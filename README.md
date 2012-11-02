@@ -10,7 +10,7 @@ Getting started
 
 Standard stuff applies to install. Use PIP to install with dependencies:
 
-    pip install git+https://github.com/mattsnider/Django-Social-User.git#egg=django_social_user
+    pip install django-social-user
 
 Or install from the command line:
 
@@ -31,4 +31,4 @@ Usage Guide
 Todo
 ====
 
-#. better error handling
+1. better error handling
