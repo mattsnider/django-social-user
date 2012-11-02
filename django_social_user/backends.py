@@ -20,7 +20,7 @@ class GenericSocialUserBackend(RemoteUserBackend):
         """
         # authentication is not for this backend
         if not (self.network == network and access_token):
-            return TypeError
+            raise TypeError
 
         # use oauth token to fetch the oauth object
         oauth_obj, uid = self.get_oauth_dict(access_token)
