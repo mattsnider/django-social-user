@@ -82,6 +82,11 @@ class GenericSocialUserBackend(RemoteUserBackend):
                 user.last_name = last_name
                 user.save()
 
+        # update the user on the social_identity
+        if user and not social_identity.user_id:
+            social_identity.user = user
+            social_identity.save()
+
         return user
 
     def get_email(self, oauth_obj):
