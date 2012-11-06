@@ -37,8 +37,10 @@ def authenticate(request, network):
     try:
         oauth_request_token = backend.get_oauth_request_token()
         request.session[SK_REQUEST_TOKEN] = oauth_request_token
+        url_prefix = 'https' if request.is_secure() else 'http'
+        url_prefix += '://%s' % request.META['HTTP_HOST']
         return redirect(backend.get_oauth_authorization_url(
-            oauth_request_token))
+            oauth_request_token, url_prefix=url_prefix))
     except:
         logger.exception('Authentication failed for %s' % network)
         r = getattr(options, 'SOCIAL_USER_REDIRECT_ON_REQUEST_TOKEN_FAILURE')

@@ -115,7 +115,7 @@ class GenericSocialUserBackend(RemoteUserBackend):
         """
         pass
 
-    def get_oauth_authorization_url(self, oauth_request_token):
+    def get_oauth_authorization_url(self, oauth_request_token, url_prefix=''):
         """
         Create the authorization URL for redirect to social network.
         """
