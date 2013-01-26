@@ -1,6 +1,6 @@
 __author__ = 'mattesnider'
 
-__version__ = (0, 1, 4)
+__version__ = (0, 1, 5)
 
 registered_networks = {}
 
