@@ -9,7 +9,7 @@ os.system('cp %s/README.md %s/README.txt' % (ROOT_DIR, ROOT_DIR))
 
 sdict = dict(
     name = 'django-social-user',
-    packages = ['django_social_user'],
+    packages = ['django_social_user', 'django_social_user.migrations'],
     version='.'.join(map(str, __import__('django_social_user').__version__)),
     description = 'A generic system for interacting with remote APIs '
                   'that need to create Django users.',
