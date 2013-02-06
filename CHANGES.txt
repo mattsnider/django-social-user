@@ -1,3 +1,8 @@
+v0.1.6, 04/5/2013
+- adding south support for future migration (although not required)
+- raising meaningful exceptions when views fail
+- updated README
+
 v0.1.5, 01/26/2013 -- Passing request.GET into the get_oauth_authorization_url backend
 
 v0.1.4, 11/05/2012 -- get_oauth_authorization_url function on backends upgraded to accept a URL prefix, as some APIs require a URL callback to be passed when creating the authorization URL, and we need information about the domain.

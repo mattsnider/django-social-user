@@ -5,7 +5,8 @@ from django.http import Http404
 from django.shortcuts import redirect
 
 from django_social_user import registered_networks, options
-from django_social_user.exceptions import SocialOauthDictFailed
+from django_social_user.exceptions import (
+    SocialOauthDictFailed, MissingRequiredSetting)
 from django_social_user.signals import (
     django_social_user_pre_auth, django_social_user_post_callback)
 
@@ -21,6 +22,8 @@ def get_network_backend_or_404(network):
     """
     backend = registered_networks.get(network)
     if not backend:
+        logger.exception(
+            'Attempting to authenticate unregistered backend %s' % network)
         raise Http404
     return backend
 
@@ -45,10 +48,9 @@ def authenticate(request, network):
             params=request.GET.dict()))
     except:
         logger.exception('Authentication failed for %s' % network)
-        r = getattr(options, 'SOCIAL_USER_REDIRECT_ON_REQUEST_TOKEN_FAILURE')
-        if r:
-            return redirect(r)
-        raise
+        return redirect_or_error(
+            options.REDIRECT_ON_REQUEST_TOKEN_FAILURE,
+            options.KEY_REQUEST_TOKEN_FAILURE)
 
 
 def callback(request, network):
@@ -68,10 +70,9 @@ def callback(request, network):
             request, oauth_request_token)
     except:
         logger.exception('Callback failed for %s' % network)
-        r = getattr(options, 'SOCIAL_USER_REDIRECT_ON_ACCESS_TOKEN_FAILURE')
-        if r:
-            return redirect(r)
-        raise
+        return redirect_or_error(
+            options.REDIRECT_ON_ACCESS_TOKEN_FAILURE,
+            options.KEY_ACCESS_TOKEN_FAILURE)
 
     # if the user is already authenticated, pass into the backend,
     #   so that the social identity can be associated to the user
@@ -93,8 +94,19 @@ def callback(request, network):
     django_social_user_post_callback.send(None, request=request)
 
     # redirect to the session value or the default redirect value
-    r = request.session.get(SK_AUTH_REDIRECT) or getattr(
-        options, 'SOCIAL_USER_REDIRECT_ON_AUTHENTICATION')
+    return redirect_or_error(
+        options.REDIRECT_ON_AUTHENTICATION, options.KEY_AUTHENTICATION,
+        override=request.session.get(SK_AUTH_REDIRECT))
+
+
+def redirect_or_error(opt, key, override=''):
+    """
+    Tests if a redirect URL is available and redirects, or raises a
+    MissingRequiredSetting exception.
+    """
+    r = (override or opt)
+
     if r:
         return redirect(r)
-    raise
+    raise MissingRequiredSetting('%s.%s' % (
+        options.KEY_DATA_DICT, key))
