@@ -21,3 +21,10 @@ class SocialIdentityOwnedByAnotherUser(ValueError):
     is already owned by another user.
     """
     pass
+
+class DoNotAuthenticate(ValueError):
+    """
+    Thrown when the django project wishes to skip the authentication
+    backend.
+    """
+    pass

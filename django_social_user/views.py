@@ -5,9 +5,9 @@ from django.http import Http404
 from django.shortcuts import redirect
 
 from django_social_user import registered_networks, options
-from django_social_user.exceptions import (
+from django_social_user.exceptions import (DoNotAuthenticate,
     SocialOauthDictFailed, MissingRequiredSetting)
-from django_social_user.signals import (
+from django_social_user.signals import (django_social_user_pre_callback,
     django_social_user_pre_auth, django_social_user_post_callback)
 
 logger = getLogger('django_social_user:views')
@@ -74,22 +74,33 @@ def callback(request, network):
             options.REDIRECT_ON_ACCESS_TOKEN_FAILURE,
             options.KEY_ACCESS_TOKEN_FAILURE)
 
-    # if the user is already authenticated, pass into the backend,
-    #   so that the social identity can be associated to the user
-    user = request.user if request.user.is_authenticated() else None
+    responses = django_social_user_pre_callback.send_robust(
+                                    None,
+                                    request=request,
+                                    network=network,
+                                    access_token=access_token,
+                                    access_token_expires=access_token_expires)
 
-    user = auth(
-        network=network, access_token=access_token,
-        access_token_expires=access_token_expires, user=user)
+    # Check to see if the pre_callback signal raised an exception to skip
+    # the authentication backend.
+    if not any([isinstance(response, DoNotAuthenticate)
+                for receiver, response in responses]):
+        # If the user is already authenticated, pass into the backend
+        # so that the social identity can be associated to the user.
+        user = request.user if request.user.is_authenticated() else None
 
-    if user is not None:
-        if user.is_active:
-            login(request, user)
+        user = auth(
+            network=network, access_token=access_token,
+            access_token_expires=access_token_expires, user=user)
+
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+            else:
+                # todo: handle this better
+                raise SocialOauthDictFailed('User is not active')
         else:
-            # todo: handle this better
-            raise SocialOauthDictFailed('User is not active')
-    else:
-        raise SocialOauthDictFailed('User not returned from authorization')
+            raise SocialOauthDictFailed('User not returned from authorization')
 
     django_social_user_post_callback.send(None, request=request)
 
