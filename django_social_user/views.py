@@ -1,10 +1,10 @@
 from logging import getLogger
 
-from django.contrib.auth import authenticate as auth, login
+from django.contrib.auth import authenticate as auth, login, get_backends
 from django.http import Http404
 from django.shortcuts import redirect
 
-from django_social_user import registered_networks, options
+from django_social_user import options
 from django_social_user.exceptions import (DoNotAuthenticate,
     SocialOauthDictFailed, MissingRequiredSetting)
 from django_social_user.signals import (django_social_user_pre_callback,
@@ -18,14 +18,17 @@ SK_REQUEST_TOKEN = 'django_social_user:oauth_request_token'
 
 def get_network_backend_or_404(network):
     """
-    Fetch the network from the registered list or throw a 404 exception.
+    Fetch the network backend from django's list of backends or throw
+    a 404 exception.
     """
-    backend = registered_networks.get(network)
-    if not backend:
-        logger.exception(
-            'Attempting to authenticate unregistered backend %s' % network)
-        raise Http404
-    return backend
+    if network:
+        for backend in get_backends():
+            if network == getattr(backend, 'network', None):
+                return backend
+
+    logger.exception(
+        'Attempting to authenticate unregistered backend %s' % network)
+    raise Http404
 
 
 def authenticate(request, network):
