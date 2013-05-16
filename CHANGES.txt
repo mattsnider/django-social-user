@@ -1,3 +1,6 @@
+v0.1.7, 05/16/2013
+- merging pull request to use native Django remote backend
+
 v0.1.6, 04/5/2013
 - adding south support for future migration (although not required)
 - raising meaningful exceptions when views fail
