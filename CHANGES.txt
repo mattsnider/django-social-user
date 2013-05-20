@@ -1,3 +1,6 @@
+v0.1.8, 05/20/2013
+- adding support for localized access_token_expires values
+
 v0.1.7, 05/16/2013
 - merging pull request to use native Django remote backend
 

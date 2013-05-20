@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import os
 
+# python setup.py sdist bdist_wininst upload
+
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # README is required for distribution, but README.md is required for github,

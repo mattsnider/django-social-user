@@ -1,6 +1,6 @@
 from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import User
-from django.utils import simplejson
+from django.utils import simplejson, timezone
 
 from django_social_user.exceptions import SocialIdentityOwnedByAnotherUser
 from django_social_user.models import SocialIdentity
@@ -60,6 +60,15 @@ class GenericSocialUserBackend(RemoteUserBackend):
                 social_identity.access_token = access_token
                 social_identity.save()
         else:
+            # if your database value for access_token_expires has timezone
+            # data, then we need to localize the access_token_expires provided
+            # by facebook to that timezone for comparison (I assume that
+            # your database and Django app use the same timezone)
+            if social_identity.access_token_expires.tzinfo:
+                if access_token_expires and timezone.get_default_timezone():
+                    access_token_expires = timezone.make_aware(
+                        access_token_expires, timezone.get_default_timezone())
+
             # Only update the access token if there isn't currently
             # one or if the new one expires later than the current one
             # (or if the current one doesn't have an expiration date).
