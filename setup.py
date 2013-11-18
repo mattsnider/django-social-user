@@ -35,8 +35,16 @@ sdict = dict(
         ]
 )
 
-from distutils.core import setup
-setup(**sdict)
+# if setup tools are available, package using setup tools
+# otherwise use default
+try:
+    from setuptools import setup
+    setup(**sdict)
+except ImportError:
+    # install_requires is not a valid key for default distutils
+    from distutils.core import setup
+    sdict.pop("install_requires", None)
+    setup(**sdict)
 
 # cleanup README
 os.remove('%s/README.txt' % ROOT_DIR)

@@ -11,6 +11,7 @@
 
 # build files
 *.egg
+*.egg-info
 MANIFEST
 dist/
 build/

@@ -1,3 +1,7 @@
+v0.1.9, 11/17/2013
+- creating a wheel distribution
+- adding optional dependency on setuptools for better package management
+
 v0.1.8, 05/20/2013
 - adding support for localized access_token_expires values
 
